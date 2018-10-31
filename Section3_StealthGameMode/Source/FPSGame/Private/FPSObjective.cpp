@@ -19,7 +19,7 @@ AFPSObjective::AFPSObjective()
 	SphereComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	SphereComp->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	SphereComp->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
-	SphereComp->SetupAttachment(MeshComp);
+	SphereComp->SetupAttachment(RootComponent);
 }
 
 // Called when the game starts or when spawned

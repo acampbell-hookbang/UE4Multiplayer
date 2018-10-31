@@ -3,6 +3,7 @@
 #include "FPSExtractionZone.h"
 #include "FPSCharacter.h"
 #include "Components/BoxComponent.h"
+#include "Components/DecalComponent.h"
 
 // Sets default values
 AFPSExtractionZone::AFPSExtractionZone()
@@ -11,12 +12,16 @@ AFPSExtractionZone::AFPSExtractionZone()
 	PrimaryActorTick.bCanEverTick = false;
 
 	OverlapComp = CreateDefaultSubobject<UBoxComponent>(TEXT("OverlapComp"));
-	OverlapComp->SetBoxExtent(FVector(200.f));
+	OverlapComp->SetBoxExtent(FVector(ZoneSize));
 	OverlapComp->SetHiddenInGame(false);
 	OverlapComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	OverlapComp->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	OverlapComp->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
 	RootComponent = OverlapComp;
+
+	DecalComp = CreateDefaultSubobject<UDecalComponent>(TEXT("DecalComp"));
+	DecalComp->DecalSize = FVector(ZoneSize);
+	DecalComp->SetupAttachment(RootComponent);
 }
 
 void AFPSExtractionZone::NotifyActorBeginOverlap(AActor * OtherActor)

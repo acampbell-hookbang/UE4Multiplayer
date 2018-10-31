@@ -7,6 +7,7 @@
 #include "FPSExtractionZone.generated.h"
 
 class UBoxComponent;
+class UDecalComponent;
 
 UCLASS()
 class FPSGAME_API AFPSExtractionZone : public AActor
@@ -14,6 +15,8 @@ class FPSGAME_API AFPSExtractionZone : public AActor
 	GENERATED_BODY()
 	
 public:	
+	const float ZoneSize = 200.0f;
+
 	// Sets default values for this actor's properties
 	AFPSExtractionZone();
 
@@ -21,6 +24,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	UBoxComponent* OverlapComp;
+
+	UPROPERTY(VisibleAnywhere, Category = "Components")
+	UDecalComponent* DecalComp;
 
 public:	
 
