@@ -2,8 +2,10 @@
 
 #include "FPSExtractionZone.h"
 #include "FPSCharacter.h"
+#include "FPSGameMode.h"
 #include "Components/BoxComponent.h"
 #include "Components/DecalComponent.h"
+#include "Engine/World.h"
 
 // Sets default values
 AFPSExtractionZone::AFPSExtractionZone()
@@ -28,9 +30,21 @@ void AFPSExtractionZone::NotifyActorBeginOverlap(AActor * OtherActor)
 {
 	Super::NotifyActorBeginOverlap(OtherActor);
 
-	UE_LOG(LogTemp, Warning, TEXT("AFPSExtractionZone: Overlap with Extraction Zone"));
+	UE_LOG(LogTemp, Warning, TEXT("Overlap with Extraction Zone"));
 	AFPSCharacter* myCharacter = Cast<AFPSCharacter>(OtherActor);
 	if (myCharacter != nullptr)
 	{
+		if (myCharacter->bIsCarryingObjective)
+		{
+			AFPSGameMode* gameMode = Cast<AFPSGameMode>(GetWorld()->GetAuthGameMode());
+			if (gameMode != nullptr)
+			{
+				gameMode->CompleteMission(Cast<APawn>(OtherActor));
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Need to get Objective before entering Extraction Zone"));
+		}
 	}
 }
