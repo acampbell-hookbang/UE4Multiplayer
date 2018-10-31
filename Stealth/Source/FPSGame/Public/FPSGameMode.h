@@ -7,6 +7,7 @@
 #include "FPSGameMode.generated.h"
 
 class APawn;
+class USoundBase;
 
 UCLASS()
 class AFPSGameMode : public AGameModeBase
@@ -21,6 +22,9 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "GameMode")
 	void OnMissionCompleted(APawn* InstigatorPawn);
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sounds")
+	USoundBase* GameCompleteSound;
 };
 
 

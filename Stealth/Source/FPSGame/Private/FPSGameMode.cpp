@@ -5,6 +5,7 @@
 #include "FPSCharacter.h"
 #include "GameFramework/Pawn.h"
 #include "UObject/ConstructorHelpers.h"
+#include "Kismet/GameplayStatics.h"
 
 AFPSGameMode::AFPSGameMode()
 {
@@ -23,7 +24,7 @@ void AFPSGameMode::CompleteMission(APawn *InstigatorPawn)
 	{
 		InstigatorPawn->DisableInput(nullptr);
 	}
-
+	UGameplayStatics::PlaySound2D(this, GameCompleteSound);
 	OnMissionCompleted(InstigatorPawn);
 }
 

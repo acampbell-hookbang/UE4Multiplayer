@@ -42,6 +42,7 @@ void AFPSObjective::NotifyActorBeginOverlap(AActor * OtherActor)
 	if (myCharacter != nullptr)
 	{
 		myCharacter->bIsCarryingObjective = true;
+		UGameplayStatics::PlaySound2D(this, PickedUpObjectiveSound);
 		Destroy();
 	}
 }

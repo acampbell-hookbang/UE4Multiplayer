@@ -7,6 +7,7 @@
 #include "FPSObjective.generated.h"
 
 class UParticleSystem;
+class USoundBase;
 class USphereComponent;
 
 UCLASS()
@@ -28,6 +29,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Effects")
 	UParticleSystem* PickupFX;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sounds")
+	USoundBase* PickedUpObjectiveSound;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
