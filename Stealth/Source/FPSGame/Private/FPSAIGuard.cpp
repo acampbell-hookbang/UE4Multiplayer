@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "FPSAIGuard.h"
+#include "DrawDebugHelpers.h"
 #include "Perception/PawnSensingComponent.h"
 
 // Sets default values
@@ -10,6 +11,15 @@ AFPSAIGuard::AFPSAIGuard()
 	PrimaryActorTick.bCanEverTick = true;
 
 	PawnSensingComp = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensingComp"));
+	PawnSensingComp->OnSeePawn.AddDynamic(this, &AFPSAIGuard::OnPawnSeen);
+}
+
+void AFPSAIGuard::OnPawnSeen(APawn* Pawn)
+{
+	if (Pawn != nullptr)
+	{
+		DrawDebugSphere(GetWorld(), Pawn->GetActorLocation(), 32.0f, 16, FColor::Red, false, 10.0f);
+	}
 }
 
 // Called when the game starts or when spawned
