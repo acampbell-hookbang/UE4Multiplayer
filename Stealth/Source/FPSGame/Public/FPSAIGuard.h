@@ -24,11 +24,19 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	UPawnSensingComponent* PawnSensingComp;
 
+	UPROPERTY(VisibleAnywhere, Category = "Orientation")
+	FRotator OriginalRotation;
+
 	UFUNCTION()
 	void OnPawnSeen(APawn* SeenPawn);
 
 	UFUNCTION()
 	void OnNoiseHeard(APawn* HeardPawn, const FVector & Location, float Volume);
+
+	UFUNCTION()
+	void ResetOrientation();
+
+	FTimerHandle ResetOrientationTimer;
 
 public:	
 	// Called every frame
