@@ -45,7 +45,7 @@ void AFPSExtractionZone::NotifyActorBeginOverlap(AActor * OtherActor)
 			AFPSGameMode* gameMode = Cast<AFPSGameMode>(GetWorld()->GetAuthGameMode());
 			if (gameMode != nullptr)
 			{
-				gameMode->CompleteMission(Cast<APawn>(OtherActor));
+				gameMode->CompleteMission(Cast<APawn>(OtherActor), true);
 			}
 		}
 		else

@@ -15,16 +15,24 @@ AFPSGameMode::AFPSGameMode()
 
 	// use our custom HUD class
 	HUDClass = AFPSHUD::StaticClass();
+
+	bIsMissionComplete = false;
 }
 
-void AFPSGameMode::CompleteMission(APawn *InstigatorPawn)
+void AFPSGameMode::CompleteMission(APawn *InstigatorPawn, bool bSuccess)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Complete Mission"));
+	if (bIsMissionComplete)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Mission is already complete."));
+		return;
+	}
+	bIsMissionComplete = true;
 	if (InstigatorPawn != nullptr)
 	{
 		InstigatorPawn->DisableInput(nullptr);
 	}
 	UGameplayStatics::PlaySound2D(this, GameCompleteSound);
-	OnMissionCompleted(InstigatorPawn);
+	OnMissionCompleted(InstigatorPawn, bSuccess);
 }
 

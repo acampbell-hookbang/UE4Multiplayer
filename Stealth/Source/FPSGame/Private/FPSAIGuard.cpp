@@ -1,7 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "FPSAIGuard.h"
+#include "FPSGameMode.h"
 #include "DrawDebugHelpers.h"
+#include "Engine/World.h"
 #include "Engine/Public/TimerManager.h"
 #include "Perception/PawnSensingComponent.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -22,6 +24,11 @@ void AFPSAIGuard::OnPawnSeen(APawn* SeenPawn)
 	if (SeenPawn != nullptr)
 	{
 		DrawDebugSphere(GetWorld(), SeenPawn->GetActorLocation(), 32.0f, 16, FColor::Red, false, 10.0f);
+		AFPSGameMode* gameMode = Cast<AFPSGameMode>(GetWorld()->GetAuthGameMode());
+		if (gameMode != nullptr)
+		{
+			gameMode->CompleteMission(Cast<APawn>(SeenPawn), false);
+		}
 	}
 }
 
