@@ -17,23 +17,32 @@ AFPSAIGuard::AFPSAIGuard()
 	PawnSensingComp = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensingComp"));
 	PawnSensingComp->OnSeePawn.AddDynamic(this, &AFPSAIGuard::OnPawnSeen);
 	PawnSensingComp->OnHearNoise.AddDynamic(this, &AFPSAIGuard::OnNoiseHeard);
+	GuardState = EAIState::Idle;
 }
 
 void AFPSAIGuard::OnPawnSeen(APawn* SeenPawn)
 {
-	if (SeenPawn != nullptr)
+	if (SeenPawn == nullptr)
 	{
-		DrawDebugSphere(GetWorld(), SeenPawn->GetActorLocation(), 32.0f, 16, FColor::Red, false, 10.0f);
-		AFPSGameMode* gameMode = Cast<AFPSGameMode>(GetWorld()->GetAuthGameMode());
-		if (gameMode != nullptr)
-		{
-			gameMode->CompleteMission(Cast<APawn>(SeenPawn), false);
-		}
+		return;
 	}
+
+	DrawDebugSphere(GetWorld(), SeenPawn->GetActorLocation(), 32.0f, 16, FColor::Red, false, 10.0f);
+	AFPSGameMode* gameMode = Cast<AFPSGameMode>(GetWorld()->GetAuthGameMode());
+	if (gameMode != nullptr)
+	{
+		gameMode->CompleteMission(Cast<APawn>(SeenPawn), false);
+	}
+	SetGuardState(EAIState::Alerted);
 }
 
 void AFPSAIGuard::OnNoiseHeard(APawn* HeardPawn, const FVector& Location, float Volume)
 {
+	if (GuardState == EAIState::Alerted)
+	{
+		return;
+	}
+
 	DrawDebugSphere(GetWorld(), Location, 32.0f, 16, FColor::Green, false, 10.0f);
 	FVector toNoiseMaker = Location - GetActorLocation();
 	toNoiseMaker.Z = 0.0f; // Ignore pitch/roll
@@ -43,11 +52,30 @@ void AFPSAIGuard::OnNoiseHeard(APawn* HeardPawn, const FVector& Location, float 
 
 	GetWorldTimerManager().ClearTimer(ResetOrientationTimer);
 	GetWorldTimerManager().SetTimer(ResetOrientationTimer, this, &AFPSAIGuard::ResetOrientation, 3);
+
+	SetGuardState(EAIState::Suspicious);
 }
 
 void AFPSAIGuard::ResetOrientation()
 {
+	if (GuardState == EAIState::Alerted)
+	{
+		return;
+	}
+
 	SetActorRotation(OriginalRotation);
+	SetGuardState(EAIState::Idle);
+}
+
+void AFPSAIGuard::SetGuardState(EAIState NewState)
+{
+	if (GuardState == NewState)
+	{
+		return;
+	}
+	GuardState = NewState;
+	OnStateChanged(NewState);
+
 }
 
 // Called when the game starts or when spawned
