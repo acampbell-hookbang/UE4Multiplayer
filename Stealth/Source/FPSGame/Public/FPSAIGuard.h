@@ -16,6 +16,15 @@ enum class EAIState : uint8
 	Alerted
 };
 
+UENUM(BlueprintType)
+enum class EPatrolState : uint8
+{
+	NotStarted,
+	InProgress,
+	Paused,
+	Stopped
+};
+
 UCLASS()
 class FPSGAME_API AFPSAIGuard : public ACharacter
 {
@@ -43,16 +52,41 @@ protected:
 
 	UFUNCTION()
 	void ResetOrientation();
+
+	FTimerHandle ResetOrientationTimer;
 	
+	// Guard Alertness
 	UFUNCTION(BlueprintImplementableEvent, Category = "AI")
 	void OnStateChanged(EAIState NewState);
 
 	void SetGuardState(EAIState NewState);
 
-	FTimerHandle ResetOrientationTimer;
-
 	EAIState GuardState;
 
+	// Guard Patrol
+	UPROPERTY(VisibleAnywhere, Category = "AI")
+	float PatrolLerpValue;
+
+	UPROPERTY(VisibleAnywhere, Category = "AI")
+	int PatrolLerpSegment;
+
+	UPROPERTY(VisibleAnywhere, Category = "AI")
+	float PatrolLerpIncrement;
+
+	UFUNCTION(BlueprintCallable, Category = "AI")
+	void SetPatrolState(EPatrolState NewState);
+
+	UFUNCTION(BlueprintCallable, Category = "AI")
+	void AddPatrolTarget(FVector TargetPos);
+
+	UFUNCTION(BlueprintCallable, Category = "AI")
+	void SetPatrolSpeed(float Speed);
+
+	void Patrol();
+
+	EPatrolState PreviousPatrolState;
+	EPatrolState PatrolState;
+	TArray<FVector> PatrolTargets;
 
 public:	
 	// Called every frame

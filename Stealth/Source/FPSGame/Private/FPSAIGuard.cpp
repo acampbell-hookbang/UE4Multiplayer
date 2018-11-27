@@ -18,6 +18,11 @@ AFPSAIGuard::AFPSAIGuard()
 	PawnSensingComp->OnSeePawn.AddDynamic(this, &AFPSAIGuard::OnPawnSeen);
 	PawnSensingComp->OnHearNoise.AddDynamic(this, &AFPSAIGuard::OnNoiseHeard);
 	GuardState = EAIState::Idle;
+	PatrolLerpValue = 0;
+	PatrolLerpSegment = 0;
+	PatrolLerpIncrement = 0.005;
+	PreviousPatrolState = EPatrolState::NotStarted;
+	PatrolState = EPatrolState::NotStarted;
 }
 
 void AFPSAIGuard::OnPawnSeen(APawn* SeenPawn)
@@ -34,6 +39,7 @@ void AFPSAIGuard::OnPawnSeen(APawn* SeenPawn)
 		gameMode->CompleteMission(Cast<APawn>(SeenPawn), false);
 	}
 	SetGuardState(EAIState::Alerted);
+	SetPatrolState(EPatrolState::Stopped);
 }
 
 void AFPSAIGuard::OnNoiseHeard(APawn* HeardPawn, const FVector& Location, float Volume)
@@ -54,6 +60,7 @@ void AFPSAIGuard::OnNoiseHeard(APawn* HeardPawn, const FVector& Location, float 
 	GetWorldTimerManager().SetTimer(ResetOrientationTimer, this, &AFPSAIGuard::ResetOrientation, 3);
 
 	SetGuardState(EAIState::Suspicious);
+	SetPatrolState(EPatrolState::Paused);
 }
 
 void AFPSAIGuard::ResetOrientation()
@@ -65,6 +72,7 @@ void AFPSAIGuard::ResetOrientation()
 
 	SetActorRotation(OriginalRotation);
 	SetGuardState(EAIState::Idle);
+	SetPatrolState(EPatrolState::InProgress);
 }
 
 void AFPSAIGuard::SetGuardState(EAIState NewState)
@@ -75,7 +83,6 @@ void AFPSAIGuard::SetGuardState(EAIState NewState)
 	}
 	GuardState = NewState;
 	OnStateChanged(NewState);
-
 }
 
 // Called when the game starts or when spawned
@@ -83,13 +90,71 @@ void AFPSAIGuard::BeginPlay()
 {
 	Super::BeginPlay();
 	OriginalRotation = GetActorRotation();
-	
+}
+
+void AFPSAIGuard::SetPatrolState(EPatrolState NewState)
+{
+	if (PatrolState == NewState || PatrolState == EPatrolState::Stopped)
+	{
+		return;
+	}
+	EPatrolState OldPatrolState = PatrolState;
+	PatrolState = NewState;
 }
 
 // Called every frame
 void AFPSAIGuard::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	Patrol();
+}
 
+void AFPSAIGuard::AddPatrolTarget(FVector TargetPos)
+{
+	PatrolTargets.Add(TargetPos);
+}
+
+void AFPSAIGuard::SetPatrolSpeed(float Speed)
+{
+	PatrolLerpIncrement = Speed;
+}
+
+void AFPSAIGuard::Patrol()
+{
+	if (PatrolState != EPatrolState::InProgress)
+	{
+		return;
+	}
+	if (PatrolTargets.Num() < 0)
+	{
+		return;
+	}
+
+	if (PreviousPatrolState == EPatrolState::NotStarted)
+	{
+		// Initialize
+		PatrolLerpValue = 0;
+		PatrolLerpSegment = 0;
+		FVector NewLocation = PatrolTargets[PatrolLerpSegment];
+		NewLocation.Z = GetActorLocation().Z;
+		SetActorLocation(NewLocation);
+	}
+	else if (PatrolTargets.Num() > 1)
+	{
+		// Increment
+		PatrolLerpValue += PatrolLerpIncrement;
+		if (PatrolLerpValue > 1.0f)
+		{
+			PatrolLerpValue = 0;
+			PatrolLerpSegment = (PatrolLerpSegment + 1) % PatrolTargets.Num();
+			PatrolLerpValue = 0.0f;
+		}
+		int IndexStart = PatrolLerpSegment;
+		int IndexEnd = (PatrolLerpSegment + 1) % PatrolTargets.Num();
+		FVector NewLocation = FMath::Lerp(PatrolTargets[IndexStart], PatrolTargets[IndexEnd], PatrolLerpValue);
+		NewLocation.Z = GetActorLocation().Z;
+		SetActorLocation(NewLocation);
+	}
+	PreviousPatrolState = PatrolState;
 }
 
